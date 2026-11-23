@@ -1,0 +1,281 @@
+// Linter y formateador. Los `overrides` son las fronteras de la arquitectura
+// hexagonal (ver docs/ARQUITECTURA.md): las dependencias solo apuntan hacia
+// dentro, ui/app -> infrastructure -> application -> domain.
+//
+// Cuando varios overrides coinciden con un archivo, las opciones de una regla
+// no se combinan: gana el último. Por eso cada capa de cada módulo tiene un
+// único bloque con todas sus restricciones. Al añadir un módulo, copia los
+// tres bloques (domain, application, infrastructure) de uno existente.
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**", "!node_modules", "!.next", "!next-env.d.ts"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended"
+    },
+    "domains": {
+      "next": "recommended",
+      "react": "recommended"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts"],
+      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+    },
+    {
+      "includes": ["src/modules/diagram/domain/**/*.ts", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "react",
+                      "react/**",
+                      "react-dom",
+                      "react-dom/**",
+                      "next",
+                      "next/**",
+                      "@/ui/**",
+                      "@/app/**",
+                      "**/application/**",
+                      "**/infrastructure/**",
+                      "@/modules/course/**"
+                    ],
+                    "message": "El dominio es TypeScript puro: no importa frameworks, capas externas ni módulos que dependen de él."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "document": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "localStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "sessionStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "navigator": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/modules/diagram/application/**/*.ts", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "react",
+                      "react/**",
+                      "react-dom",
+                      "react-dom/**",
+                      "next",
+                      "next/**",
+                      "@/ui/**",
+                      "@/app/**",
+                      "**/infrastructure/**",
+                      "@/modules/course/**"
+                    ],
+                    "message": "La aplicación depende de puertos del dominio, nunca de adaptadores ni frameworks."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "document": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "localStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "sessionStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "navigator": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/modules/diagram/infrastructure/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/ui/**", "@/app/**", "@/modules/course/**"],
+                    "message": "Los adaptadores no conocen la interfaz que los usa."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/modules/course/domain/**/*.ts", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "react",
+                      "react/**",
+                      "react-dom",
+                      "react-dom/**",
+                      "next",
+                      "next/**",
+                      "@/ui/**",
+                      "@/app/**",
+                      "**/application/**",
+                      "**/infrastructure/**"
+                    ],
+                    "message": "El dominio es TypeScript puro: no importa frameworks, capas externas ni módulos que dependen de él."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "document": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "localStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "sessionStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "navigator": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/modules/course/application/**/*.ts", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "react",
+                      "react/**",
+                      "react-dom",
+                      "react-dom/**",
+                      "next",
+                      "next/**",
+                      "@/ui/**",
+                      "@/app/**",
+                      "**/infrastructure/**"
+                    ],
+                    "message": "La aplicación depende de puertos del dominio, nunca de adaptadores ni frameworks."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "document": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "localStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "sessionStorage": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador.",
+                  "navigator": "El dominio y la aplicación no usan APIs del navegador: eso va en un adaptador."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/modules/course/infrastructure/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/ui/**", "@/app/**"],
+                    "message": "Los adaptadores no conocen la interfaz que los usa."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/ui/**", "src/app/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/modules/*/infrastructure/svg",
+                      "@/modules/*/infrastructure/svg/**",
+                      "@/modules/*/infrastructure/content",
+                      "@/modules/*/infrastructure/content/**"
+                    ],
+                    "message": "La interfaz entra a cada módulo por su container, no por los detalles del adaptador."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

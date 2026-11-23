@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistemas animados
 
-## Getting Started
+Curso interactivo de diseño de sistemas. Cada lección es un diagrama
+isométrico que se anima paso a paso mientras un panel explica qué ocurre.
 
-First, run the development server:
+## Empezar
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+```
+bun install
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Comando          | Qué hace                   |
+| ---------------- | -------------------------- |
+| `bun dev`        | Servidor de desarrollo     |
+| `bun run check`  | Tipos, lint y pruebas      |
+| `bun run format` | Aplica el formato de Biome |
+| `bun test`       | Pruebas                    |
+| `bun run build`  | Compilación de producción  |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## En una lección
 
-## Learn More
+`←` `→` cambian de paso · `R` repite la animación · `Espacio` pausa el tráfico
+· `0` reencuadra · rueda y arrastre para zoom y movimiento.
 
-To learn more about Next.js, take a look at the following resources:
+## Documentación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): capas, módulos y cómo extender.
+- [`docs/LECCIONES.md`](docs/LECCIONES.md): cómo escribir una lección.
+- [`docs/DECISIONES.md`](docs/DECISIONES.md): por qué el proyecto es como es.
+- [`CHANGELOG.md`](CHANGELOG.md): qué cambió en cada versión.
+- [`AGENTS.md`](AGENTS.md): instrucciones para agentes de IA.
