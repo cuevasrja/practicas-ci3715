@@ -14,20 +14,24 @@ Cómo usarlo:
   alternativas no necesita entrada.
 - La plantilla está al final.
 
-| Nº    | Decisión                                                 | Estado  |
-| ----- | -------------------------------------------------------- | ------- |
-| D-001 | Motor de animación propio sobre SVG                      | Vigente |
-| D-002 | Escenas completas por paso, animadas por diferencia      | Vigente |
-| D-003 | Lecciones como datos TypeScript, con contenido original  | Vigente |
-| D-004 | El paso actual vive en la URL                            | Vigente |
-| D-005 | Progreso en el navegador, sin cuentas                    | Vigente |
-| D-006 | Identidad visual propia con variables CSS                | Vigente |
-| D-007 | `params` se lee dentro de `<Suspense>`                   | Vigente |
-| D-008 | Arquitectura hexagonal por módulos, vigilada por ESLint  | Vigente |
-| D-009 | Puertos de repositorio aunque hoy solo haya un adaptador | Vigente |
-| D-010 | `course` depende del dominio de `diagram`                | Vigente |
-| D-011 | bun como gestor de paquetes y ejecutor de pruebas        | Vigente |
-| D-012 | Biome como linter y formateador                          | Vigente |
+| Nº    | Decisión                                                     | Estado               |
+| ----- | ------------------------------------------------------------ | -------------------- |
+| D-001 | Motor de animación propio sobre SVG                          | Vigente              |
+| D-002 | Escenas completas por paso, animadas por diferencia          | Vigente              |
+| D-003 | Lecciones como datos TypeScript, con contenido original      | Vigente              |
+| D-004 | El paso actual vive en la URL                                | Vigente              |
+| D-005 | Progreso en el navegador, sin cuentas                        | Vigente              |
+| D-006 | Identidad visual propia con variables CSS                    | Sustituida por D-014 |
+| D-007 | `params` se lee dentro de `<Suspense>`                       | Vigente              |
+| D-008 | Arquitectura hexagonal por módulos, vigilada por ESLint      | Vigente              |
+| D-009 | Puertos de repositorio aunque hoy solo haya un adaptador     | Vigente              |
+| D-010 | `course` depende del dominio de `diagram`                    | Vigente              |
+| D-011 | bun como gestor de paquetes y ejecutor de pruebas            | Vigente              |
+| D-012 | Biome como linter y formateador                              | Vigente              |
+| D-013 | Segundo tipo de diagrama (secuencia) detrás del mismo puerto | Vigente              |
+| D-014 | Paleta y tipografía de las láminas del curso                 | Vigente              |
+| D-015 | CI-3715 como flujo principal; lo anterior, material extra    | Vigente              |
+| D-016 | Catálogo de estilos y patrones como recorrido aparte         | Vigente              |
 
 ---
 
@@ -135,7 +139,7 @@ adaptador nuevo de `ProgressRepository`.
 ## D-006 — Identidad visual propia con variables CSS
 
 - **Fecha:** 2026-11-23
-- **Estado:** Vigente
+- **Estado:** Sustituida por D-014 (se conserva el mecanismo de variables CSS)
 
 **Contexto.** El sitio de referencia tiene un estilo muy reconocible (papel
 cálido, tipografía monoespaciada, contornos gruesos) que no debía imitarse.
@@ -265,6 +269,120 @@ herramientas y dos configuraciones para lo que Biome ya cubre.
   dominio `next`; no se ha hecho un inventario de cuáles son.
 - El formato pasa a ser obligatorio: `bun run lint` falla si un archivo no
   está formateado.
+
+## D-013 — Segundo tipo de diagrama (secuencia) detrás del mismo puerto
+
+- **Fecha:** 2026-11-23
+- **Estado:** Vigente
+
+**Contexto.** El curso gira en torno al diagrama de secuencia de diseño, con
+una notación obligatoria (puntas negras y blancas, retornos punteados,
+fragmentos). El motor isométrico no sabe dibujarlo.
+
+**Decisión.** `Scene` pasa a ser una unión de dos tipos: `IsoScene` y
+`SequenceScene`. Cada uno tiene su adaptador SVG y ambos implementan el mismo
+puerto `ScenePlayer`; un reproductor intermedio elige según `scene.kind`. La
+geometría del diagrama (columnas, filas, fragmentos, barras, rama atenuada)
+vive en el dominio y se prueba sin navegador.
+
+Se mantiene D-002: cada paso declara la escena completa. El diagrama se
+escribe una vez y cada paso solo cambia el `cursor`, el número de filas
+visibles.
+
+**Alternativas descartadas.**
+
+- Mermaid: dibuja la notación, pero no permite revelar mensaje a mensaje,
+  atenuar una rama ni seguir al mensaje con la cámara.
+- Forzar la secuencia sobre el motor isométrico: no hay forma razonable de
+  representar líneas de vida ni fragmentos con nodos y enlaces.
+- Un puerto distinto para secuencias: la interfaz tendría que saber qué tipo
+  de lección muestra.
+
+**Consecuencias.** La interfaz no cambia según el tipo de lección, salvo la
+leyenda y el botón de pausa. Hay dos adaptadores que mantener. El ancho de las
+etiquetas se estima por número de caracteres, sin medir el texto: una
+tipografía muy distinta obligaría a ajustar esa constante.
+
+## D-014 — Paleta y tipografía de las láminas del curso
+
+- **Fecha:** 2026-11-23
+- **Estado:** Vigente. Sustituye a D-006.
+
+**Contexto.** El contexto del curso define la paleta de las láminas (fondo
+oscuro `#17252B`, menta `#2FA37A`, ámbar `#F2A541`, rojo `#D9534F`…) y pide
+animaciones coherentes con ellas.
+
+**Decisión.** La paleta del curso sustituye a la anterior en todo el sitio,
+en tema claro y oscuro. Se conserva el mecanismo de D-006: todo color es una
+variable CSS. Títulos en Caladea y texto en Carlito, los equivalentes libres
+de Cambria y Calibri.
+
+**Alternativas descartadas.**
+
+- Aplicarla solo a los diagramas de secuencia: dos estilos en el mismo sitio.
+- Servir Cambria y Calibri: son tipografías de Microsoft y no se pueden
+  distribuir en la web. Si están instaladas en el equipo, se usan primero.
+
+**Consecuencias.** El sitio y las láminas se ven como parte del mismo curso.
+La menta de la paleta no da contraste suficiente como texto sobre fondo claro,
+así que para texto y bordes se usa un tono más oscuro (`#1C7A5A`) y la menta
+original queda para rellenos.
+
+## D-015 — CI-3715 como flujo principal; lo anterior, material extra
+
+- **Fecha:** 2026-11-23
+- **Estado:** Vigente
+
+**Contexto.** El sitio nació con tres lecciones de sistemas en producción.
+Ahora es el material animado de CI-3715.
+
+**Decisión.** Cada lección declara `track`: `principal` para las 11 clases,
+en orden, y `extra` para las tres anteriores. La portada y la barra lateral
+muestran primero el flujo principal por bloques. «Siguiente lección» no salta
+de un recorrido al otro.
+
+Las clases 8 a 11 usan diagramas de secuencia. Las clases 1 a 7 usan el motor
+isométrico con las ideas de cada clase que ese motor representa bien.
+
+**Consecuencias.** Quedan fuera de esta entrega las sesiones prácticas (8B,
+9B, 10B…) y las ideas de las clases 1 a 7 que piden otro tipo de animación:
+el planning poker, los sustantivos que se convierten en clases o la balanza
+de Liskov. Los textos de las clases se redactaron a partir de
+`docs/CONTEXTO-CURSO.md` y no los ha revisado todavía el profesor.
+
+## D-016 — Catálogo de estilos y patrones como recorrido aparte
+
+- **Fecha:** 2026-11-23
+- **Estado:** Vigente
+
+**Contexto.** Las clases 4, 5, 9 y 10 presentan muchos estilos de arquitectura
+y patrones de diseño, pero cada lección del flujo principal solo anima dos o
+tres. Se pidió tenerlos todos.
+
+**Decisión.** Un tercer recorrido, `catalogo`, con seis lecciones agrupadas
+por familia: dos de estilos y cuatro de patrones. Cada patrón es una ficha de
+dos pasos, el problema sin el patrón y la solución con él, con la nota «En
+Cuentas Claras» tomada de las láminas de la clase 5. Los estilos llevan uno o
+dos pasos cada uno, con lo que resuelven y lo que cuestan.
+
+El contenido sale de las láminas de las clases 4 y 5. Se añadió lo que faltaba
+para que el catálogo estuviera completo: del libro base, par a par, tres
+niveles y tuberías y filtros; del catálogo original de patrones, Memento e
+Interpreter; y Flyweight, que las láminas listan sin desarrollar.
+
+**Alternativas descartadas.**
+
+- Una lección por patrón: 35 tarjetas en la portada y lecciones de tres pasos.
+- Meterlos en las clases 4 y 5: las alargaría mucho más allá de lo que cubre
+  una clase.
+- Diagramas de clases, como en las láminas: el motor no los dibuja. Se usan
+  escenas de objetos colaborando, que muestran el efecto del patrón pero no
+  su estructura de clases.
+
+**Consecuencias.** Se puede enlazar a un patrón concreto con `?paso=N`, pero
+no hay una página propia por patrón ni un buscador. Las fichas de Flyweight,
+Memento e Interpreter usan ejemplos que no vienen del material del curso y lo
+dicen en su nota.
 
 ---
 

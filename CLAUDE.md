@@ -9,5 +9,5 @@
   anteriores.
 - Si `bun dev` ya está en marcha, no arranques otro: úsalo en
   `http://localhost:3000`.
-- Documentos de referencia: `docs/ARQUITECTURA.md`, `docs/LECCIONES.md`,
-  `docs/DECISIONES.md`.
+- Documentos de referencia: `docs/CONTEXTO-CURSO.md`, `docs/ARQUITECTURA.md`,
+  `docs/LECCIONES.md`, `docs/DECISIONES.md`.

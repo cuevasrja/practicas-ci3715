@@ -60,7 +60,8 @@ const hacia = (n: 1 | 2 | 3, rate: number, extra: Partial<Flow> = {}): Flow => (
 
 export const balanceoDeCarga: Lesson = {
   slug: "balanceo-de-carga",
-  module: "Fundamentos",
+  module: "Sistemas en producción",
+  track: "extra",
   title: "Balanceo de carga",
   summary:
     "Cómo repartir el tráfico entre varias máquinas, qué criterio usar y qué pasa cuando una de ellas falla.",

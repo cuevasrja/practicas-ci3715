@@ -59,7 +59,8 @@ const pagina: Flow = { route: ["nav", "srv", "db"], kind: "request", rate: 0.7, 
 
 export const cicloDeUnaPeticion: Lesson = {
   slug: "ciclo-de-una-peticion",
-  module: "Fundamentos",
+  module: "Sistemas en producción",
+  track: "extra",
   title: "El ciclo de una petición",
   summary:
     "Qué ocurre entre que pulsas Intro y aparece la página: DNS, conexión, cifrado, servidor y base de datos.",

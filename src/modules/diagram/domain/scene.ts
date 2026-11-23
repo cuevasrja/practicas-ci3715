@@ -3,6 +3,8 @@
  * para poder pasarlo de un Server Component a uno de cliente.
  */
 
+import type { SequenceScene } from "./sequence";
+
 export type Tone = "slate" | "indigo" | "cyan" | "amber" | "rose" | "emerald" | "violet";
 
 export type EntityType = "block" | "device" | "db" | "queue" | "zone" | "panel";
@@ -80,13 +82,23 @@ export type Flow = {
   dwellAt?: Record<string, number>;
 };
 
-export type Scene = {
+/** Escena isométrica: nodos, enlaces y tráfico. */
+export type IsoScene = {
+  /** Opcional: una escena sin `kind` es isométrica. */
+  kind?: "iso";
   entities: Entity[];
   links: Link[];
   flows: Flow[];
 };
 
-export const EMPTY_SCENE: Scene = { entities: [], links: [], flows: [] };
+/** Lo que un paso de lección puede mostrar en el escenario. */
+export type Scene = IsoScene | SequenceScene;
+
+export function isSequence(scene: Scene): scene is SequenceScene {
+  return scene.kind === "sequence";
+}
+
+export const EMPTY_SCENE: IsoScene = { entities: [], links: [], flows: [] };
 
 export function linkId(l: Link): string {
   return l.id ?? `${l.from}>${l.to}`;

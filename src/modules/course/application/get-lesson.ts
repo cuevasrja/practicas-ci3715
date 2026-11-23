@@ -6,7 +6,7 @@ export type LessonView = {
   lesson: Lesson;
   /** Temario completo, para la navegación lateral. */
   lessons: LessonSummary[];
-  /** Lección siguiente en el temario, si la hay. */
+  /** Lección siguiente dentro del mismo recorrido (principal o extra), si la hay. */
   next: LessonSummary | null;
 };
 
@@ -15,9 +15,11 @@ export async function getLesson(repo: LessonRepository, slug: string): Promise<L
   const all = await repo.findAll();
   const index = all.findIndex((l) => l.slug === slug);
   if (index === -1) return null;
-  const next = all[index + 1];
+  const lesson = all[index];
+  const track = all.filter((l) => l.track === lesson.track);
+  const next = track[track.indexOf(lesson) + 1];
   return {
-    lesson: all[index],
+    lesson,
     lessons: all.map(toSummary),
     next: next ? toSummary(next) : null,
   };

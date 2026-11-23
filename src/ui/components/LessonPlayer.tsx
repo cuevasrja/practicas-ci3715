@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { LessonSummary } from "@/modules/course/application/lesson-summary";
 import type { Lesson } from "@/modules/course/domain/lesson";
 import { progressContainer } from "@/modules/course/infrastructure/progress-container";
-import { EMPTY_SCENE, type PacketKind } from "@/modules/diagram/domain/scene";
+import { EMPTY_SCENE, isSequence, type PacketKind } from "@/modules/diagram/domain/scene";
 import { useReducedMotion } from "@/ui/hooks/use-reduced-motion";
 import { setUrlStep, useUrlStep } from "@/ui/hooks/use-url-step";
 import { GuidePanel } from "./GuidePanel";
@@ -59,6 +59,37 @@ function ToolButton({
   );
 }
 
+const MESSAGE_SAMPLES = [
+  { label: "síncrono", dashed: false, solid: true },
+  { label: "asíncrono", dashed: false, solid: false },
+  { label: "retorno", dashed: true, solid: false },
+];
+
+function SequenceLegend() {
+  return (
+    <ul className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap gap-x-3.5 gap-y-1 rounded-lg border border-line bg-surface/90 px-2.5 py-1.5 text-[12px] text-ink-2 backdrop-blur">
+      {MESSAGE_SAMPLES.map((m) => (
+        <li key={m.label} className="flex items-center gap-1.5">
+          <svg viewBox="0 0 30 10" className="h-2.5 w-[30px]" aria-hidden="true">
+            <line
+              className={`legend-line${m.dashed ? " legend-line--dashed" : ""}`}
+              x1="1"
+              y1="5"
+              x2="21"
+              y2="5"
+            />
+            <polygon
+              className={`legend-head ${m.solid ? "legend-head--solid" : "legend-head--open"}`}
+              points="29,5 20,1 20,9"
+            />
+          </svg>
+          {m.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function LessonPlayer({
   lesson,
   lessons,
@@ -103,25 +134,22 @@ export function LessonPlayer({
       else if (e.key === " ") {
         // En un botón o enlace, Espacio conserva su función habitual.
         if (target?.closest("button, a")) return;
+        if (isSequence(lesson.steps[index].scene)) return;
         togglePause();
       } else return;
       e.preventDefault();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go, index, replay, togglePause]);
+  }, [go, index, lesson, replay, togglePause]);
 
-  const kinds = [...new Set(step.scene.flows.map((f) => f.kind))];
+  const sequence = isSequence(step.scene);
+  const kinds = isSequence(step.scene) ? [] : [...new Set(step.scene.flows.map((f) => f.kind))];
 
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[232px_minmax(0,1fr)_400px]">
       <aside className="hidden overflow-y-auto border-r border-line bg-surface xl:block">
-        <Sidebar
-          module={lesson.module}
-          lessons={lessons}
-          current={lesson.slug}
-          goals={lesson.goals}
-        />
+        <Sidebar lessons={lessons} current={lesson.slug} goals={lesson.goals} />
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-col">
@@ -132,21 +160,27 @@ export function LessonPlayer({
             paused={paused}
             label={`Diagrama animado: ${step.title}`}
           />
-          <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-3">
-            <div className="pointer-events-auto">
+          <div
+            className={`pointer-events-none absolute inset-x-3 flex justify-between gap-3 ${
+              sequence ? "bottom-3 items-end" : "top-3 items-start"
+            }`}
+          >
+            <div className="pointer-events-auto min-w-0">
               <Hud metrics={step.metrics ?? []} />
             </div>
             <div className="pointer-events-auto flex shrink-0 gap-1.5">
               <ToolButton onClick={replay} label="Repetir la animación" hint="R">
                 <path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4.5h4.5" />
               </ToolButton>
-              <ToolButton
-                onClick={togglePause}
-                label={paused ? "Reanudar el tráfico" : "Pausar el tráfico"}
-                hint="Espacio"
-              >
-                {paused ? <path d="M8 5.5v13l10-6.5z" /> : <path d="M9 5v14M15 5v14" />}
-              </ToolButton>
+              {sequence ? null : (
+                <ToolButton
+                  onClick={togglePause}
+                  label={paused ? "Reanudar el tráfico" : "Pausar el tráfico"}
+                  hint="Espacio"
+                >
+                  {paused ? <path d="M8 5.5v13l10-6.5z" /> : <path d="M9 5v14M15 5v14" />}
+                </ToolButton>
+              )}
               <ToolButton
                 onClick={() => stage.current?.fit()}
                 label="Encuadrar el diagrama"
@@ -168,6 +202,7 @@ export function LessonPlayer({
               ))}
             </ul>
           ) : null}
+          {sequence ? <SequenceLegend /> : null}
         </div>
         <Timeline steps={lesson.steps} index={index} onSelect={go} />
       </div>

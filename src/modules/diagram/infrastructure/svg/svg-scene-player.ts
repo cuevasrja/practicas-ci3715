@@ -8,6 +8,7 @@ import { clamp01, easeBack, easeInOut, easeOut, lerp } from "@/modules/diagram/d
 import {
   depth,
   emptyBounds,
+  growBounds,
   type LinkGeometry,
   linkGeometry,
   project,
@@ -25,10 +26,10 @@ import {
   type Entity,
   type Flow,
   flowKey,
+  type IsoScene,
   type Link,
   linkId,
   type PacketKind,
-  type Scene,
 } from "@/modules/diagram/domain/scene";
 import { Timeline } from "@/modules/diagram/domain/tween";
 import { attachControls, Camera, type View } from "./camera";
@@ -87,6 +88,8 @@ type LinkRec = {
   progress: number;
   opacity: number;
   leaving: boolean;
+  /** La etiqueta ya tiene su sitio definitivo y puede mostrarse. */
+  labelReady: boolean;
 };
 
 type FlowRec = { flow: Flow; key: string; acc: number; active: boolean };
@@ -100,10 +103,10 @@ type Packet = {
   y: number;
 };
 
-export class SvgScenePlayer implements ScenePlayer {
+export class SvgScenePlayer implements ScenePlayer<IsoScene> {
   private timeline = new Timeline();
   private camera: Camera;
-  private scene: Scene = EMPTY_SCENE;
+  private scene: IsoScene = EMPTY_SCENE;
   private ents = new Map<string, EntRec>();
   private links = new Map<string, LinkRec>();
   private flows: FlowRec[] = [];
@@ -112,6 +115,7 @@ export class SvgScenePlayer implements ScenePlayer {
   private raf = 0;
   private last = 0;
   private linksDirty = false;
+  private labelsDirty = false;
   private paused: boolean;
   private reduced: boolean;
   private detach: () => void;
@@ -166,7 +170,7 @@ export class SvgScenePlayer implements ScenePlayer {
   // ---------------------------------------------------------------- API
 
   /** Anima desde la escena actual hasta `next`. */
-  goTo(next: Scene, opts: { instant?: boolean } = {}): void {
+  goTo(next: IsoScene, opts: { instant?: boolean } = {}): void {
     const instant = opts.instant || this.reduced;
     this.timeline.finishAll();
     this.timeline.sync(performance.now());
@@ -303,6 +307,9 @@ export class SvgScenePlayer implements ScenePlayer {
           rec.progress = k;
           this.paintLink(rec);
         },
+        done: () => {
+          this.labelsDirty = true;
+        },
       });
     }
 
@@ -320,17 +327,20 @@ export class SvgScenePlayer implements ScenePlayer {
       duration: 0,
       done: () => {
         for (const f of fresh) f.active = true;
+        this.labelsDirty = true;
       },
     });
 
     if (instant) {
       this.timeline.finishAll();
       this.flushLinks();
+      this.resolveLabels();
+      this.labelsDirty = false;
     }
   }
 
   /** Repite la última transición: salta a `prev` y anima hasta `current`. */
-  replay(prev: Scene, current: Scene): void {
+  replay(prev: IsoScene, current: IsoScene): void {
     this.clearPackets();
     this.goTo(prev, { instant: true });
     this.goTo(current);
@@ -374,6 +384,10 @@ export class SvgScenePlayer implements ScenePlayer {
     this.last = now;
     this.timeline.tick(now);
     this.flushLinks();
+    if (this.labelsDirty) {
+      this.labelsDirty = false;
+      this.resolveLabels();
+    }
     if (!this.paused) this.stepPackets(dt);
     this.raf = requestAnimationFrame(this.frame);
   };
@@ -452,6 +466,7 @@ export class SvgScenePlayer implements ScenePlayer {
       progress: 0,
       opacity: 1,
       leaving: false,
+      labelReady: false,
     };
     this.links.set(rec.id, rec);
     this.layoutLink(rec);
@@ -482,6 +497,63 @@ export class SvgScenePlayer implements ScenePlayer {
     this.paintLink(rec);
   }
 
+  /**
+   * Recoloca las etiquetas de los enlaces para que no pisen los textos de los
+   * nodos ni otras etiquetas. Prueba varias posiciones a lo largo del enlace,
+   * por debajo y por encima, y se queda con la que menos solapa.
+   */
+  private resolveLabels(): void {
+    const MARGIN = 3;
+    const obstacles: DOMRect[] = [];
+    for (const ent of this.ents.values()) {
+      // Textos y volúmenes: una etiqueta tampoco debe quedar detrás de un nodo.
+      for (const node of ent.g.querySelectorAll(
+        "text, .tag-box, .face-top, .face-left, .face-right, .panel-box",
+      )) {
+        obstacles.push(node.getBoundingClientRect());
+      }
+    }
+    const overlap = (a: DOMRect, b: DOMRect) =>
+      Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left) + MARGIN) *
+      Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) + MARGIN);
+
+    for (const rec of this.links.values()) {
+      const label = rec.nodes.label;
+      if (!label || !rec.geom || rec.leaving || rec.len === 0) continue;
+      const below = rec.nodes.cut ? 22 : 17;
+      const place = (x: number, y: number, anchor: "start" | "end") => {
+        label.setAttribute("x", x.toFixed(1));
+        label.setAttribute("y", y.toFixed(1));
+        label.setAttribute("text-anchor", anchor);
+        return label.getBoundingClientRect();
+      };
+      type Spot = { x: number; y: number; anchor: "start" | "end"; cost: number };
+      let best: Spot | null = null;
+      search: for (const t of [0.5, 0.36, 0.64, 0.24, 0.76]) {
+        const at = rec.nodes.path.getPointAtLength(rec.len * t);
+        const ahead = rec.nodes.path.getPointAtLength(Math.min(rec.len, rec.len * t + 2));
+        // El enlace es diagonal: el texto se ancla del lado en que la línea se
+        // aleja, para que no lo atraviese.
+        const descends = (ahead.x - at.x) * (ahead.y - at.y) >= 0;
+        for (const under of [true, false]) {
+          const anchor = under === descends ? "end" : "start";
+          const x = at.x + (anchor === "end" ? -5 : 5);
+          const y = at.y + (under ? below : -9);
+          const rect = place(x, y, anchor);
+          let cost = 0;
+          for (const o of obstacles) cost += overlap(rect, o);
+          if (!best || cost < best.cost) best = { x, y, anchor, cost };
+          if (cost === 0) break search;
+        }
+      }
+      if (best) obstacles.push(place(best.x, best.y, best.anchor));
+      if (!rec.labelReady) {
+        rec.labelReady = true;
+        this.paintLink(rec);
+      }
+    }
+  }
+
   private paintLink(rec: LinkRec): void {
     const { nodes, progress, len } = rec;
     const solid = (rec.data.style ?? "solid") === "solid";
@@ -500,7 +572,7 @@ export class SvgScenePlayer implements ScenePlayer {
     const late = String(clamp01((progress - 0.8) / 0.2));
     if (nodes.headEnd) nodes.headEnd.style.opacity = late;
     if (nodes.headStart) nodes.headStart.style.opacity = late;
-    if (nodes.label) nodes.label.style.opacity = late;
+    if (nodes.label) nodes.label.style.opacity = rec.labelReady ? late : "0";
   }
 
   // ----------------------------------------------------------- paquetes
@@ -601,7 +673,17 @@ export class SvgScenePlayer implements ScenePlayer {
 
   private targetView(): View {
     const b = emptyBounds();
+    const byId = new Map(this.scene.entities.map((e) => [e.id, e]));
     for (const e of this.scene.entities) entityBounds(e, b);
+    // La esquina de un enlace con codo puede quedar fuera de los nodos.
+    for (const l of this.scene.links) {
+      const from = byId.get(l.from);
+      const to = byId.get(l.to);
+      if (!from || !to || from.x === to.x || from.y === to.y) continue;
+      const corner = l.via === "y" ? project(from.x, to.y) : project(to.x, from.y);
+      growBounds(b, corner.x - 14, corner.y - 14);
+      growBounds(b, corner.x + 14, corner.y + 14);
+    }
     return this.camera.fit(b);
   }
 

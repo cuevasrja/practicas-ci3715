@@ -2,78 +2,96 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/*
+ * Paleta de las láminas de CI-3715: fondo oscuro #17252B, texto #1F2D33,
+ * menta #2FA37A / #DDF2E9, ámbar #F2A541 / #FCEFD9, gris #5B6B70,
+ * fondo claro #F4F7F6 y rojo #D9534F. Los tonos de texto sobre fondo claro se
+ * oscurecen un poco respecto a la paleta para mantener el contraste.
+ */
 :root {
   color-scheme: light;
-  --bg: #f1f4f9;
+  --bg: #f4f7f6;
   --surface: #ffffff;
-  --stage: #e9edf5;
-  --grid: #d9dfeb;
-  --line: #d8deea;
-  --ink: #111827;
-  --ink-2: #42506a;
-  --muted: #66738c;
-  --accent: #4338ca;
-  --accent-soft: #e3e6ff;
-  --link: #7c89a3;
+  --stage: #edf2f0;
+  --grid: #dde6e3;
+  --line: #d3dedb;
+  --ink: #1f2d33;
+  --ink-2: #3d4d53;
+  --muted: #5b6b70;
+  --accent: #1c7a5a;
+  --accent-fill: #2fa37a;
+  --on-accent: #0f1f1a;
+  --accent-soft: #ddf2e9;
+  --amber: #f2a541;
+  --amber-ink: #a86a0e;
+  --amber-soft: #fcefd9;
+  --link: #7e8f93;
   --top-mix: 70%;
+  --sq-external: #e1e7e6;
 
-  --tone-slate: #9aa7bd;
-  --tone-indigo: #8792f5;
-  --tone-cyan: #62c3de;
-  --tone-amber: #f0b354;
-  --tone-rose: #ee8598;
-  --tone-emerald: #63c990;
-  --tone-violet: #b396f0;
+  --tone-slate: #9aa9ad;
+  --tone-indigo: #7fa6c9;
+  --tone-cyan: #6fbfc4;
+  --tone-amber: #f2a541;
+  --tone-rose: #e27672;
+  --tone-emerald: #58be98;
+  --tone-violet: #9d96cc;
 
-  --ok: #16a34a;
-  --warn: #d97706;
-  --bad: #dc2626;
+  --ok: #1c7a5a;
+  --warn: #a86a0e;
+  --bad: #c4423e;
 
-  --pkt-request: #f59e0b;
-  --pkt-response: #16a34a;
-  --pkt-handshake: #8b5cf6;
-  --pkt-query: #0891b2;
-  --pkt-write: #4f46e5;
-  --pkt-slow: #ca8a04;
-  --pkt-drop: #e11d48;
-  --pkt-ping: #f8fafc;
+  --pkt-request: #f2a541;
+  --pkt-response: #2fa37a;
+  --pkt-handshake: #8a7fd0;
+  --pkt-query: #3e9fb0;
+  --pkt-write: #445a62;
+  --pkt-slow: #c98a1b;
+  --pkt-drop: #d9534f;
+  --pkt-ping: #f4f7f6;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0b0f17;
-  --surface: #131925;
-  --stage: #0e131c;
-  --grid: #1a2231;
-  --line: #242d40;
-  --ink: #e7ebf3;
-  --ink-2: #b3bdcf;
-  --muted: #8693aa;
-  --accent: #a5abff;
-  --accent-soft: #1d2248;
-  --link: #5d6b86;
+  --bg: #17252b;
+  --surface: #1e3037;
+  --stage: #132026;
+  --grid: #1f3138;
+  --line: #2d4149;
+  --ink: #f4f7f6;
+  --ink-2: #c6d1cf;
+  --muted: #93a4a7;
+  --accent: #5fcaa2;
+  --accent-fill: #2fa37a;
+  --on-accent: #0f1f1a;
+  --accent-soft: #1d3d35;
+  --amber: #f2a541;
+  --amber-ink: #f2a541;
+  --amber-soft: #3d3220;
+  --link: #6c7e83;
   --top-mix: 84%;
+  --sq-external: #2b3d44;
 
-  --tone-slate: #74829b;
-  --tone-indigo: #6f7ae6;
-  --tone-cyan: #44a9c6;
-  --tone-amber: #d99a3a;
-  --tone-rose: #d86a80;
-  --tone-emerald: #46ad76;
-  --tone-violet: #9a7ce0;
+  --tone-slate: #74858a;
+  --tone-indigo: #6289ad;
+  --tone-cyan: #4fa2a8;
+  --tone-amber: #d9922f;
+  --tone-rose: #cc605c;
+  --tone-emerald: #3fa37f;
+  --tone-violet: #8079b3;
 
-  --ok: #4ade80;
-  --warn: #fbbf24;
-  --bad: #f87171;
+  --ok: #5fcaa2;
+  --warn: #f2a541;
+  --bad: #ee7b77;
 
-  --pkt-request: #fbbf24;
-  --pkt-response: #4ade80;
-  --pkt-handshake: #a78bfa;
-  --pkt-query: #22d3ee;
-  --pkt-write: #818cf8;
-  --pkt-slow: #eab308;
-  --pkt-drop: #fb7185;
-  --pkt-ping: #0e131c;
+  --pkt-request: #f2a541;
+  --pkt-response: #5fcaa2;
+  --pkt-handshake: #a79df0;
+  --pkt-query: #5cc0d1;
+  --pkt-write: #b9c7cb;
+  --pkt-slow: #d9a13a;
+  --pkt-drop: #ee7b77;
+  --pkt-ping: #132026;
 }
 
 @theme inline {
@@ -85,18 +103,23 @@
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-on-accent: var(--on-accent);
   --color-accent-soft: var(--accent-soft);
+  --color-amber: var(--amber-ink);
+  --color-amber-soft: var(--amber-soft);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: Calibri, var(--font-carlito), system-ui, sans-serif;
+  --font-display: Cambria, var(--font-caladea), Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: Calibri, var(--font-carlito), system-ui, sans-serif;
 }
 
 :focus-visible {
@@ -114,7 +137,7 @@ body {
   touch-action: none;
   user-select: none;
   cursor: grab;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: Calibri, var(--font-carlito), system-ui, sans-serif;
 }
 .stage-svg:active {
   cursor: grabbing;
@@ -153,6 +176,7 @@ body {
 .ent--dead {
   --c: var(--tone-slate);
 }
+
 .face-top,
 .face-left,
 .face-right {
@@ -200,8 +224,8 @@ body {
 }
 .ent-label {
   fill: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   paint-order: stroke;
   stroke: var(--stage);
   stroke-width: 4px;
@@ -211,13 +235,13 @@ body {
   fill: var(--line);
 }
 .gauge--low {
-  fill: var(--ok);
+  fill: var(--accent-fill);
 }
 .gauge--mid {
-  fill: var(--warn);
+  fill: var(--amber);
 }
 .gauge--high {
-  fill: var(--bad);
+  fill: #d9534f;
 }
 
 .tag-box {
@@ -238,8 +262,8 @@ body {
 }
 .zone-label {
   fill: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .panel-box {
@@ -249,12 +273,12 @@ body {
 }
 .panel-title {
   fill: var(--ink);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 700;
 }
 .panel-key {
   fill: var(--ink-2);
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 .panel-val {
   fill: var(--ink);
@@ -294,6 +318,7 @@ body {
   stroke-linecap: round;
 }
 .link-label {
+  transition: opacity 0.2s;
   fill: var(--muted);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 10.5px;
@@ -373,6 +398,158 @@ body {
   to {
     filter: brightness(1);
   }
+}
+
+/* ------------------------------------------------- diagrama de secuencia */
+
+.sq-band {
+  fill: var(--stage);
+}
+.sq-lifeline {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+  opacity: 0.75;
+}
+.sq-box {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 1.3;
+}
+.sq-head--external .sq-box {
+  fill: var(--sq-external);
+}
+.sq-name {
+  fill: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.sq-stereo {
+  fill: var(--muted);
+  font-size: 11px;
+  font-style: italic;
+}
+.sq-actor {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.sq-bar {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+.sq-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.sq-arrow {
+  fill: var(--ink);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.sq-label {
+  fill: var(--ink);
+  font-size: 13px;
+  paint-order: stroke;
+  stroke: var(--stage);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+/* Asíncrono, retorno y creación llevan el triángulo de relleno blanco. */
+.sq-msg--async .sq-arrow,
+.sq-msg--return .sq-arrow,
+.sq-msg--create .sq-arrow {
+  fill: var(--stage);
+}
+.sq-msg--return .sq-line,
+.sq-msg--create .sq-line {
+  stroke-dasharray: 5 4;
+}
+.sq-msg--return .sq-label {
+  fill: var(--muted);
+  font-style: italic;
+}
+.sq-current .sq-line {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+.sq-current .sq-arrow {
+  stroke: var(--accent);
+}
+.sq-current.sq-msg--sync .sq-arrow {
+  fill: var(--accent);
+}
+.sq-current .sq-label {
+  fill: var(--ink);
+  font-weight: 700;
+}
+
+.sq-frame {
+  fill: color-mix(in oklab, var(--amber) 7%, transparent);
+  stroke: var(--amber-ink);
+  stroke-width: 1.2;
+}
+.sq-tab {
+  fill: var(--amber-soft);
+  stroke: var(--amber-ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.sq-op {
+  fill: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.sq-guard {
+  fill: var(--ink-2);
+  font-size: 12.5px;
+  paint-order: stroke;
+  stroke: var(--stage);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.sq-divider {
+  stroke: var(--amber-ink);
+  stroke-width: 1.2;
+  stroke-dasharray: 6 5;
+}
+.sq-stage-line {
+  stroke: var(--muted);
+  stroke-dasharray: 2 6;
+}
+.sq-stage-pill {
+  fill: var(--ink);
+}
+.sq-stage-text {
+  fill: var(--bg);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* Muestras de la leyenda. */
+.legend-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.legend-line--dashed {
+  stroke-dasharray: 4 3;
+}
+.legend-head {
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.legend-head--solid {
+  fill: var(--ink);
+}
+.legend-head--open {
+  fill: var(--surface);
 }
 
 /* --------------------------------------------------------------- guía */

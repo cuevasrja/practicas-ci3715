@@ -38,7 +38,7 @@ function Counter({ value }: { value: number }) {
 export function Hud({ metrics }: { metrics: Metric[] }) {
   if (metrics.length === 0) return null;
   return (
-    <dl className="flex flex-wrap gap-1.5">
+    <dl className="flex flex-nowrap gap-1.5 overflow-x-auto whitespace-nowrap">
       {metrics.map((m) => (
         <div
           key={m.label}

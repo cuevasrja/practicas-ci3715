@@ -16,10 +16,19 @@ export type Step = {
   scene: Scene;
 };
 
+export type LessonTrack = "principal" | "catalogo" | "extra";
+
 export type Lesson = {
   slug: string;
   /** Módulo del temario al que pertenece. */
   module: string;
+  /**
+   * `principal`: clases del curso, en orden. `catalogo`: referencia de estilos
+   * y patrones. `extra`: material complementario.
+   */
+  track: LessonTrack;
+  /** Rótulo corto en el temario, por ejemplo «Clase 8». */
+  label?: string;
   title: string;
   summary: string;
   minutes: number;

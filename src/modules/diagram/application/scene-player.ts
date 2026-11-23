@@ -7,13 +7,14 @@ export type ScenePlayerOptions = {
 
 /**
  * Puerto primario del módulo: lo que la interfaz puede pedirle a un
- * reproductor de escenas, sin saber con qué tecnología dibuja.
+ * reproductor de escenas, sin saber con qué tecnología dibuja. `S` acota el
+ * tipo de escena que entiende un adaptador concreto.
  */
-export interface ScenePlayer {
+export interface ScenePlayer<S extends Scene = Scene> {
   /** Anima desde la escena actual hasta `next`. */
-  goTo(next: Scene, opts?: { instant?: boolean }): void;
+  goTo(next: S, opts?: { instant?: boolean }): void;
   /** Repite una transición: salta a `prev` y anima hasta `current`. */
-  replay(prev: Scene, current: Scene): void;
+  replay(prev: S, current: S): void;
   /** Detiene o reanuda el tráfico de paquetes. */
   setPaused(paused: boolean): void;
   /** Reencuadra la escena actual. */

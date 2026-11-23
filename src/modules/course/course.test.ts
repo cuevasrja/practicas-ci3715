@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { IsoScene } from "@/modules/diagram/domain/scene";
 import { getLesson } from "./application/get-lesson";
 import { listLessons } from "./application/list-lessons";
 import { recordProgress } from "./application/record-progress";
@@ -19,6 +20,7 @@ import { StaticLessonRepository } from "./infrastructure/static-lesson-repositor
 const lesson = (slug: string, extra: Partial<Lesson> = {}): Lesson => ({
   slug,
   module: "Prueba",
+  track: "principal",
   title: slug,
   summary: "",
   minutes: 1,
@@ -78,7 +80,7 @@ describe("validación de lecciones (dominio)", () => {
 
   test("detecta enlaces y flujos rotos", () => {
     const bad = lesson("Mal Slug");
-    bad.steps[0].scene.links = [{ from: "a", to: "z" }];
+    (bad.steps[0].scene as IsoScene).links = [{ from: "a", to: "z" }];
     const problems = validateLesson(bad).join("\n");
     expect(problems).toContain("slug no válido");
     expect(problems).toContain('"z", que no existe');
@@ -119,7 +121,7 @@ describe("contenido", () => {
 
   test("el repositorio rechaza contenido roto", () => {
     const bad = lesson("roto");
-    bad.steps[0].scene.flows = [{ route: ["a", "c"], kind: "request", rate: 1 }];
+    (bad.steps[0].scene as IsoScene).flows = [{ route: ["a", "c"], kind: "request", rate: 1 }];
     expect(() => new StaticLessonRepository([bad])).toThrow("no válida");
   });
 });

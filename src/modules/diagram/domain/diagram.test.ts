@@ -3,7 +3,9 @@ import { diffScenes } from "./diff";
 import { easeBack, easeInOut, easeOut } from "./easing";
 import { linkGeometry, project } from "./iso";
 import { advance, alongLink, newPacket } from "./packets";
-import type { Entity, Scene } from "./scene";
+import type { Entity, IsoScene } from "./scene";
+import { type MessageRow, type Participant, type Row, validateSequence } from "./sequence";
+import { dimmedRows, layoutSequence, wrapLabel } from "./sequence-layout";
 import { Timeline } from "./tween";
 
 const ent = (id: string, x: number, y: number, extra: Partial<Entity> = {}): Entity => ({
@@ -55,7 +57,7 @@ describe("easing", () => {
 });
 
 describe("diff", () => {
-  const scene = (entities: Entity[], links: Scene["links"] = []): Scene => ({
+  const scene = (entities: Entity[], links: IsoScene["links"] = []): IsoScene => ({
     entities,
     links,
     flows: [],
@@ -180,5 +182,109 @@ describe("recorte por detrás", () => {
     // Sale por delante de A (hacia +x) y llega por detrás de B (desde -x).
     expect(g.start).toEqual(project(1, 0));
     expect(g.end).toEqual(project(4, 0));
+  });
+});
+
+describe("secuencia", () => {
+  const participants: Participant[] = [
+    { id: "u", kind: "actor", name: "Usuario" },
+    { id: "a", kind: "object", name: ":App" },
+    { id: "g", kind: "object", name: ":Grupo" },
+    { id: "r", kind: "object", name: ":Recibo" },
+  ];
+  const msg = (from: string, to: string, kind: MessageRow["kind"], label = "m"): Row => ({
+    type: "message",
+    from,
+    to,
+    kind,
+    label,
+  });
+  const rows: Row[] = [
+    msg("u", "a", "sync"), // 0
+    msg("a", "g", "sync", "registrarGasto(pagador, monto, participantes)"), // 1
+    { type: "fragment", op: "alt", guard: "pagador es miembro" }, // 2
+    msg("g", "r", "create", "«create»"), // 3
+    { type: "fragment", op: "opt", guard: "hay correo" }, // 4
+    msg("g", "g", "sync", "notificar()"), // 5
+    { type: "end" }, // 6
+    msg("g", "a", "return", "gasto"), // 7
+    { type: "else", guard: "no es miembro" }, // 8
+    msg("g", "a", "return", "ErrorPagador"), // 9
+    { type: "end" }, // 10
+    msg("a", "u", "return"), // 11
+  ];
+  const layout = layoutSequence(participants, rows);
+
+  test("las columnas siguen el orden y se separan para que quepa la etiqueta", () => {
+    const xs = layout.heads.map((h) => h.x);
+    expect(xs).toEqual([...xs].sort((a, b) => a - b));
+    const short = layoutSequence(participants, [msg("a", "g", "sync", "x")]);
+    expect(xs[2] - xs[1]).toBeGreaterThan(short.heads[2].x - short.heads[1].x);
+  });
+
+  test("una etiqueta larga se parte antes de sus parámetros", () => {
+    expect(wrapLabel("obtener(grupoId)")).toEqual(["obtener(grupoId)"]);
+    expect(wrapLabel("POST /grupos/{id}/gastos (pagador, monto)")).toEqual([
+      "POST /grupos/{id}/gastos",
+      "(pagador, monto)",
+    ]);
+    expect(wrapLabel("muestra el gasto y los saldos actualizados")).toHaveLength(1);
+  });
+
+  test("las filas bajan y cada fragmento envuelve a los que contiene", () => {
+    const ys = layout.rows.flatMap((r) => (r.type === "message" ? [r.y] : []));
+    expect(ys).toEqual([...ys].sort((a, b) => a - b));
+    const alt = layout.rows[2];
+    const opt = layout.rows[4];
+    if (alt.type !== "fragment" || opt.type !== "fragment") throw new Error("tipos");
+    expect(alt.end).toBe(10);
+    expect(alt.x).toBeLessThan(opt.x);
+    expect(alt.x + alt.w).toBeGreaterThan(opt.x + opt.w);
+    expect(alt.y + alt.h).toBeGreaterThan(opt.y + opt.h);
+  });
+
+  test("el objeto creado aparece a la altura de su mensaje", () => {
+    const recibo = layout.heads[3];
+    const create = layout.rows[3];
+    if (create.type !== "message") throw new Error("tipo");
+    expect(recibo.createdAt).toBe(3);
+    expect(recibo.y).toBeLessThan(create.y);
+    expect(recibo.y + recibo.h).toBeGreaterThan(create.y);
+    expect(create.x2).toBe(recibo.x - recibo.w / 2);
+  });
+
+  test("una llamada síncrona abre una barra que su retorno cierra", () => {
+    const app = layout.bars.find((b) => b.participant === "a");
+    const last = layout.rows[11];
+    if (last.type !== "message") throw new Error("tipo");
+    expect(app?.startRow).toBe(0);
+    expect(app?.y2).toBe(last.y);
+    // El grupo retorna en las dos ramas: la barra llega hasta la más baja.
+    const grupo = layout.bars.find((b) => b.participant === "g" && b.startRow === 1);
+    const error = layout.rows[9];
+    if (error.type !== "message") throw new Error("tipo");
+    expect(grupo?.y2).toBe(error.y);
+    expect(layout.bars.some((b) => b.participant === "u")).toBe(false);
+  });
+
+  test("se atenúa la rama del alt que no se toma", () => {
+    expect([...dimmedRows(rows, 2)]).toEqual([]);
+    expect([...dimmedRows(rows, 8)].sort((a, b) => a - b)).toEqual([8, 9]);
+    expect([...dimmedRows(rows, 10)].sort((a, b) => a - b)).toEqual([3, 4, 5, 6, 7]);
+    expect([...dimmedRows(rows, 12)]).toEqual([]);
+  });
+
+  test("la validación detecta diagramas incoherentes", () => {
+    const scene = { kind: "sequence" as const, participants, rows, cursor: 3 };
+    expect(validateSequence(scene)).toEqual([]);
+    const bad = validateSequence({
+      ...scene,
+      cursor: 99,
+      rows: [msg("u", "zz", "sync"), { type: "else", guard: "x" }, { type: "end" }],
+    }).join("\n");
+    expect(bad).toContain("cursor 99 fuera de rango");
+    expect(bad).toContain('participante desconocido "zz"');
+    expect(bad).toContain('"else" fuera de un alt');
+    expect(bad).toContain('"end" sin fragmento abierto');
   });
 });

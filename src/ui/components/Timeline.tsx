@@ -16,7 +16,7 @@ export function Timeline({
     <div className="border-t border-line bg-surface px-3 py-2.5">
       <div className="h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
         <div
-          className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out motion-reduce:transition-none"
+          className="h-full rounded-full bg-accent-fill transition-[width] duration-500 ease-out motion-reduce:transition-none"
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -1,4 +1,4 @@
-import { type Entity, type Link, linkId, type Scene } from "./scene";
+import { type Entity, type IsoScene, type Link, linkId } from "./scene";
 
 export type Kept<T> = { from: T; to: T; changed: boolean };
 
@@ -16,7 +16,7 @@ function same(a: unknown, b: unknown): boolean {
 }
 
 /** Compara dos escenas por id y clasifica qué sale, qué entra y qué cambia. */
-export function diffScenes(prev: Scene, next: Scene): SceneDiff {
+export function diffScenes(prev: IsoScene, next: IsoScene): SceneDiff {
   const prevEnts = new Map(prev.entities.map((e) => [e.id, e]));
   const nextEnts = new Map(next.entities.map((e) => [e.id, e]));
   const prevLinks = new Map(prev.links.map((l) => [linkId(l), l]));

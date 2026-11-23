@@ -47,7 +47,26 @@ const SHAPES: Record<Entity["type"], Shape> = {
 
 const DB_RX = 38;
 const DB_RY = 19;
-const PANEL_W = 236;
+const PANEL_MIN_W = 236;
+
+/** El panel se ensancha para que la etiqueta y el valor de cada fila no se toquen. */
+function panelWidth(e: Entity): number {
+  const rows = (e.rows ?? []).map(([k, v]) => k.length * 6.5 + v.length * 6.8 + 52);
+  return Math.max(PANEL_MIN_W, e.label.length * 7.6 + 30, ...rows);
+}
+
+const TAG_CH = 6.4;
+const TAG_PAD = 7;
+const TAG_GAP = 5;
+
+function tagWidths(tags: string[]): number[] {
+  return tags.map((t) => t.length * TAG_CH + TAG_PAD * 2);
+}
+
+function tagsWidth(tags: string[] | undefined): number {
+  if (!tags?.length) return 0;
+  return tagWidths(tags).reduce((a, b) => a + b, 0) + TAG_GAP * (tags.length - 1);
+}
 const ROW_H = 20;
 
 export function linkRadius(e: Entity): { front: number; back: number } {
@@ -187,11 +206,9 @@ export function buildEntity(g: SVGGElement, body: SVGGElement, e: Entity): void 
   }
 
   if (e.tags?.length) {
-    const CH = 6.4;
-    const PAD = 7;
-    const GAP = 5;
-    const widths = e.tags.map((t) => t.length * CH + PAD * 2);
-    const total = widths.reduce((a, b) => a + b, 0) + GAP * (widths.length - 1);
+    const GAP = TAG_GAP;
+    const widths = tagWidths(e.tags);
+    const total = tagsWidth(e.tags);
     let x = -total / 2;
     const y = topY - 22;
     e.tags.forEach((t, i) => {
@@ -250,6 +267,7 @@ function panelHeight(e: Entity): number {
 
 function buildPanel(body: SVGGElement, e: Entity): void {
   const h = panelHeight(e);
+  const PANEL_W = panelWidth(e);
   el(
     "rect",
     { class: "panel-box", x: -PANEL_W / 2, y: 0, width: PANEL_W, height: h, rx: 10 },
@@ -284,12 +302,13 @@ export function entityBounds(e: Entity, b: Bounds): void {
     return;
   }
   if (e.type === "panel") {
-    growBounds(b, p.x - PANEL_W / 2, p.y);
-    growBounds(b, p.x + PANEL_W / 2, p.y + panelHeight(e));
+    const w = panelWidth(e);
+    growBounds(b, p.x - w / 2, p.y);
+    growBounds(b, p.x + w / 2, p.y + panelHeight(e));
     return;
   }
   const s = SHAPES[e.type];
-  const half = Math.max(56, e.label.length * 3.6);
+  const half = Math.max(56, e.label.length * 3.9, tagsWidth(e.tags) / 2 + 4);
   growBounds(b, p.x - half, p.y - s.h - 30 - (e.tags?.length ? 26 : 0));
   growBounds(b, p.x + half, p.y + 50 + (e.load !== undefined ? 12 : 0));
 }

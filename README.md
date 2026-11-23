@@ -1,7 +1,11 @@
-# Sistemas animados
+# CI-3715 animado
 
-Curso interactivo de diseño de sistemas. Cada lección es un diagrama
-isométrico que se anima paso a paso mientras un panel explica qué ocurre.
+Material animado de CI-3715 Ingeniería de Software (Universidad Simón Bolívar).
+Cada clase es una lección por pasos con un diagrama que avanza mientras un
+panel explica qué ocurre: escenas isométricas para las clases 1 a 7 y
+diagramas de secuencia de diseño para las clases 8 a 11. Incluye un catálogo
+de estilos de arquitectura y patrones de diseño, y tres lecciones extra sobre
+sistemas en producción.
 
 ## Empezar
 
@@ -23,10 +27,12 @@ Abre <http://localhost:3000>.
 ## En una lección
 
 `←` `→` cambian de paso · `R` repite la animación · `Espacio` pausa el tráfico
-· `0` reencuadra · rueda y arrastre para zoom y movimiento.
+(en las escenas isométricas) · `0` reencuadra · rueda y arrastre para zoom y
+movimiento.
 
 ## Documentación
 
+- [`docs/CONTEXTO-CURSO.md`](docs/CONTEXTO-CURSO.md): contenido del curso y notación.
 - [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): capas, módulos y cómo extender.
 - [`docs/LECCIONES.md`](docs/LECCIONES.md): cómo escribir una lección.
 - [`docs/DECISIONES.md`](docs/DECISIONES.md): por qué el proyecto es como es.

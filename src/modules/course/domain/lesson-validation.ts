@@ -1,3 +1,4 @@
+import { validateScene } from "@/modules/diagram/domain/scene-validation";
 import type { Lesson } from "./lesson";
 
 /**
@@ -11,28 +12,12 @@ export function validateLesson(lesson: Lesson): string[] {
   }
   if (lesson.steps.length === 0) problems.push("la lección no tiene pasos");
 
+  const titles = new Set<string>();
   lesson.steps.forEach((step, i) => {
     const where = `paso ${i + 1}`;
-    const ids = new Set<string>();
-    for (const e of step.scene.entities) {
-      if (ids.has(e.id)) problems.push(`${where}: id de entidad repetido "${e.id}"`);
-      ids.add(e.id);
-    }
-    for (const l of step.scene.links) {
-      for (const end of [l.from, l.to]) {
-        if (!ids.has(end)) problems.push(`${where}: el enlace usa "${end}", que no existe`);
-      }
-    }
-    for (const f of step.scene.flows) {
-      if (f.route.length < 2) problems.push(`${where}: flujo con menos de dos nodos`);
-      for (let k = 0; k < f.route.length - 1; k++) {
-        const [a, b] = [f.route[k], f.route[k + 1]];
-        const linked = step.scene.links.some(
-          (l) => (l.from === a && l.to === b) || (l.from === b && l.to === a),
-        );
-        if (!linked) problems.push(`${where}: el flujo va de "${a}" a "${b}" sin enlace`);
-      }
-    }
+    if (titles.has(step.title)) problems.push(`${where}: título repetido "${step.title}"`);
+    titles.add(step.title);
+    for (const problem of validateScene(step.scene)) problems.push(`${where}: ${problem}`);
   });
   return problems;
 }

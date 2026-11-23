@@ -9,16 +9,65 @@ Las secciones son: Añadido, Cambiado, Corregido, Eliminado.
 
 ## [Sin publicar]
 
+### Añadido
+
+- Catálogo de estilos de arquitectura y patrones de diseño, en seis lecciones
+  aparte del flujo principal (D-016):
+  - Estilos clásicos: cliente-servidor, par a par, capas cerradas y abiertas,
+    tres niveles, repositorio, tuberías y filtros, MVC, MVP y MVVM.
+  - Estilos distribuidos: monolito modular, SOA con bus de servicios,
+    microservicios, dirigido por eventos, CQRS y hexagonal.
+  - Patrones creacionales: Factory Method, Abstract Factory, Builder, Object
+    Pool, Prototype y Singleton.
+  - Patrones estructurales: Adapter, Bridge, Composite, Facade, Decorator,
+    Flyweight y Proxy.
+  - Patrones de comportamiento: Command, Chain of Responsibility, Iterator,
+    Mediator, Memento, Observer, State, Strategy, Template Method, Visitor e
+    Interpreter.
+- Atajos para escribir escenas isométricas y fichas de problema y solución
+  (`content/iso-helpers.ts`).
+
+### Corregido
+
+- Textos que se pisaban en los diagramas: los paneles de resumen se ensanchan
+  según su contenido y las etiquetas de los enlaces buscan un sitio libre, sin
+  tapar nombres de nodos ni quedar atravesadas por su propia línea.
+- El encuadre reserva espacio para los contadores, las herramientas y la
+  leyenda, y tiene en cuenta las etiquetas superiores de los nodos.
+- En pantallas estrechas los contadores se quedan en una sola fila.
+
 ### Cambiado
 
-- Biome sustituye a ESLint como linter y pasa a ser también el formateador.
-  Las fronteras de la arquitectura se conservan como `overrides` en
-  `biome.jsonc` (D-012).
-- Todo el código se reformatea con Biome (ancho de 100, imports ordenados).
+- Las lecciones tienen un tercer recorrido, `catalogo`, que la portada muestra
+  entre las clases y el material extra.
+
+## [0.3.0] - 2026-11-23
 
 ### Añadido
 
+- Las 11 clases de CI-3715 como flujo principal, una lección por clase, en
+  tres bloques: proceso y análisis (1 a 3), diseño (4 a 7) y secuencias de
+  diseño (8 a 11) (D-015).
+- Diagramas de secuencia animados: actores, líneas de vida, mensajes
+  síncronos, asíncronos y de retorno, creación de objetos, mensajes a sí
+  mismo, fragmentos (`alt`, `opt`, `loop`, `break`, `par`) y etapas. La rama
+  de un `alt` que no se recorre se atenúa (D-013).
+- Atajos para escribir diagramas de secuencia por tramos
+  (`content/sequence-helpers.ts`).
+- `docs/CONTEXTO-CURSO.md`: el contexto del curso como referencia.
 - Script `bun run format`.
+
+### Cambiado
+
+- Las tres lecciones anteriores pasan a ser material extra (D-015).
+- La paleta y la tipografía son las de las láminas del curso, en todo el
+  sitio (D-014).
+- El sitio se presenta como material de CI-3715: portada, título y cabecera.
+- La barra lateral muestra el temario completo agrupado por bloque.
+- El encuadre de las escenas isométricas incluye las esquinas de los enlaces.
+- Biome sustituye a ESLint como linter y pasa a ser también el formateador.
+  Las fronteras de la arquitectura se conservan como `overrides` en
+  `biome.jsonc` (D-012).
 
 ### Eliminado
 

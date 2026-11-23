@@ -25,19 +25,25 @@ desactives la regla.
 
 ### `src/modules/diagram` — el motor de diagramas animados
 
-Sabe representar y animar una escena. No sabe nada de lecciones.
+Sabe representar y animar una escena. No sabe nada de lecciones. Hay dos tipos
+de escena: la isométrica (nodos, enlaces y tráfico) y el diagrama de secuencia
+(participantes y mensajes de arriba abajo).
 
-| Capa           | Archivo                                  | Qué contiene                                                   |
-| -------------- | ---------------------------------------- | -------------------------------------------------------------- |
-| domain         | `scene.ts`                               | Modelo de escena: `Entity`, `Link`, `Flow`, `Scene`            |
-| domain         | `iso.ts`                                 | Proyección isométrica 2:1 y geometría de enlaces               |
-| domain         | `diff.ts`                                | Comparación de dos escenas: qué entra, sale, se mueve o cambia |
-| domain         | `tween.ts`, `easing.ts`                  | Planificador de tweens independiente del reloj                 |
-| domain         | `packets.ts`                             | Simulación del avance de un paquete por una ruta               |
-| application    | `scene-player.ts`                        | Puerto primario `ScenePlayer`                                  |
-| infrastructure | `svg/svg-scene-player.ts`                | Adaptador que implementa `ScenePlayer` sobre SVG               |
-| infrastructure | `svg/render.ts`, `camera.ts`, `icons.ts` | Dibujo de nodos, cámara, iconos                                |
-| infrastructure | `container.ts`                           | `createScenePlayer()`: elige el adaptador                      |
+| Capa           | Archivo                                  | Qué contiene                                                                                                       |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| domain         | `scene.ts`                               | Modelo de escena: `Entity`, `Link`, `Flow`, `Scene`                                                                |
+| domain         | `sequence.ts`, `sequence-layout.ts`      | Modelo del diagrama de secuencia y su geometría: columnas, filas, fragmentos, barras de activación y rama atenuada |
+| domain         | `scene-validation.ts`                    | `validateScene()`: coherencia de una escena de cualquier tipo                                                      |
+| domain         | `iso.ts`                                 | Proyección isométrica 2:1 y geometría de enlaces                                                                   |
+| domain         | `diff.ts`                                | Comparación de dos escenas: qué entra, sale, se mueve o cambia                                                     |
+| domain         | `tween.ts`, `easing.ts`                  | Planificador de tweens independiente del reloj                                                                     |
+| domain         | `packets.ts`                             | Simulación del avance de un paquete por una ruta                                                                   |
+| application    | `scene-player.ts`                        | Puerto primario `ScenePlayer`                                                                                      |
+| infrastructure | `svg/svg-scene-player.ts`                | Adaptador que implementa `ScenePlayer` sobre SVG                                                                   |
+| infrastructure | `svg/svg-sequence-player.ts`             | Adaptador que implementa `ScenePlayer` para diagramas de secuencia                                                 |
+| infrastructure | `svg/switching-scene-player.ts`          | Elige el adaptador según el tipo de escena                                                                         |
+| infrastructure | `svg/render.ts`, `camera.ts`, `icons.ts` | Dibujo de nodos, cámara, iconos                                                                                    |
+| infrastructure | `container.ts`                           | `createScenePlayer()`: elige el adaptador                                                                          |
 
 Todo el dominio es matemática pura y se prueba sin navegador. El adaptador SVG
 es el único sitio donde se toca el DOM y `requestAnimationFrame`.
@@ -52,6 +58,7 @@ es el único sitio donde se toca el DOM y `requestAnimationFrame`.
 | domain         | `lesson-repository.ts`                 | Puerto secundario `LessonRepository`                        |
 | domain         | `progress-repository.ts`               | Puerto secundario `ProgressRepository`                      |
 | application    | `list-lessons.ts`, `get-lesson.ts`     | Casos de uso de lectura                                     |
+| application    | `group-by-module.ts`                   | Agrupa el temario por módulo                                |
 | application    | `record-progress.ts`                   | Caso de uso de escritura                                    |
 | application    | `lesson-summary.ts`                    | DTO `LessonSummary`                                         |
 | infrastructure | `content/*.ts`                         | Las lecciones, como datos                                   |
@@ -59,6 +66,11 @@ es el único sitio donde se toca el DOM y `requestAnimationFrame`.
 | infrastructure | `local-storage-progress-repository.ts` | Adaptador de `ProgressRepository`                           |
 | infrastructure | `container.ts`                         | Composición del lado servidor                               |
 | infrastructure | `progress-container.ts`                | Composición del lado cliente                                |
+
+Cada lección pertenece a un recorrido (`track`): `principal` para las clases
+de CI-3715, en orden; `catalogo` para la referencia de estilos y patrones; y
+`extra` para el material complementario. «Siguiente
+lección» no cruza de un recorrido al otro.
 
 `course` depende del dominio de `diagram` (un paso contiene una `Scene`).
 Nunca al revés.
@@ -103,15 +115,16 @@ Abrir `/leccion/cache?paso=3`:
 
 ## Cómo extender
 
-| Quiero…                                 | Toco…                                                                                                           |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Añadir una lección                      | `course/infrastructure/content/` (ver `docs/LECCIONES.md`)                                                      |
-| Servir lecciones desde un CMS o una API | Un adaptador nuevo de `LessonRepository` y una línea en `course/infrastructure/container.ts`                    |
-| Guardar el progreso en servidor         | Un adaptador nuevo de `ProgressRepository` y `progress-container.ts`                                            |
-| Dibujar con Canvas o WebGL              | Un adaptador nuevo de `ScenePlayer` y `diagram/infrastructure/container.ts`                                     |
-| Un tipo de nodo nuevo                   | `diagram/domain/scene.ts` (tipo) y `diagram/infrastructure/svg/render.ts` (dibujo)                              |
-| Un tipo de paquete nuevo                | `scene.ts`, la velocidad en `svg-scene-player.ts`, el color en `globals.css`, la etiqueta en `LessonPlayer.tsx` |
-| Una regla de negocio nueva              | `domain/` del módulo, con su prueba                                                                             |
+| Quiero…                                       | Toco…                                                                                                           |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Añadir una lección                            | `course/infrastructure/content/` (ver `docs/LECCIONES.md`)                                                      |
+| Servir lecciones desde un CMS o una API       | Un adaptador nuevo de `LessonRepository` y una línea en `course/infrastructure/container.ts`                    |
+| Guardar el progreso en servidor               | Un adaptador nuevo de `ProgressRepository` y `progress-container.ts`                                            |
+| Dibujar con Canvas o WebGL                    | Un adaptador nuevo de `ScenePlayer` y `diagram/infrastructure/container.ts`                                     |
+| Un tipo de nodo nuevo                         | `diagram/domain/scene.ts` (tipo) y `diagram/infrastructure/svg/render.ts` (dibujo)                              |
+| Un tipo de paquete nuevo                      | `scene.ts`, la velocidad en `svg-scene-player.ts`, el color en `globals.css`, la etiqueta en `LessonPlayer.tsx` |
+| Un elemento nuevo de la notación de secuencia | `diagram/domain/sequence.ts` (tipo), `sequence-layout.ts` (geometría) y `svg/svg-sequence-player.ts` (dibujo)   |
+| Una regla de negocio nueva                    | `domain/` del módulo, con su prueba                                                                             |
 
 ## Pruebas
 

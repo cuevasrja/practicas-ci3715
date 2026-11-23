@@ -61,7 +61,8 @@ const guardar = (rate: number): Flow => ({ route: ["app", "cache"], kind: "write
 
 export const cacheLesson: Lesson = {
   slug: "cache",
-  module: "Fundamentos",
+  module: "Sistemas en producción",
+  track: "extra",
   title: "Caché",
   summary:
     "Guardar respuestas ya calculadas para no repetir trabajo, y los problemas que aparecen cuando los datos cambian.",

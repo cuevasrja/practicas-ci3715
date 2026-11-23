@@ -8,12 +8,20 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Sistemas animados
+# CI-3715 animado
 
-Curso interactivo de diseño de sistemas: lecciones por pasos con diagramas
-isométricos animados. Next.js 16 (App Router, Cache Components), React 19,
-TypeScript estricto, Tailwind v4, bun. Todo el contenido y la interfaz están
-en español.
+Material animado de CI-3715 Ingeniería de Software (Universidad Simón Bolívar):
+una lección por clase, por pasos, con un diagrama que avanza mientras se lee.
+Las clases 1 a 7 usan escenas isométricas; las clases 8 a 11, diagramas de
+secuencia de diseño. Un catálogo aparte recorre todos los estilos de
+arquitectura y patrones de diseño, y tres lecciones de sistemas en producción
+quedan como material extra. Next.js 16 (App Router, Cache Components), React 19,
+TypeScript estricto, Tailwind v4, bun, Biome. Todo el contenido y la interfaz
+están en español.
+
+`docs/CONTEXTO-CURSO.md` es la fuente del contenido del curso: temas por
+clase, ejemplos (el proyecto Cuentas Claras), notación obligatoria de los
+diagramas de secuencia y paleta. Léelo antes de escribir o corregir una clase.
 
 ## Comandos
 
@@ -59,15 +67,16 @@ Reglas, comprobadas por Biome (`biome.jsonc`):
 
 ## Dónde va cada cambio
 
-| Tarea                                    | Lugar                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
-| Lección nueva o editar una               | `src/modules/course/infrastructure/content/` — sigue `docs/LECCIONES.md` |
-| Regla de negocio                         | `domain/` del módulo, con prueba                                         |
-| Nueva operación para la interfaz         | Caso de uso en `application/`, expuesto en el `container`                |
-| Otro origen de datos                     | Adaptador nuevo que implemente el puerto, cambiado en el `container`     |
-| Aspecto de nodos, enlaces o paquetes     | `diagram/infrastructure/svg/render.ts` y `src/app/globals.css`           |
-| Tiempos y comportamiento de la animación | `diagram/infrastructure/svg/svg-scene-player.ts`                         |
-| Componentes y atajos de teclado          | `src/ui/components/`                                                     |
+| Tarea                                              | Lugar                                                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Lección nueva o editar una                         | `src/modules/course/infrastructure/content/` — sigue `docs/LECCIONES.md`                  |
+| Regla de negocio                                   | `domain/` del módulo, con prueba                                                          |
+| Nueva operación para la interfaz                   | Caso de uso en `application/`, expuesto en el `container`                                 |
+| Otro origen de datos                               | Adaptador nuevo que implemente el puerto, cambiado en el `container`                      |
+| Aspecto de nodos, enlaces o paquetes               | `diagram/infrastructure/svg/render.ts` y `src/app/globals.css`                            |
+| Notación o animación de los diagramas de secuencia | `diagram/domain/sequence-layout.ts` y `diagram/infrastructure/svg/svg-sequence-player.ts` |
+| Tiempos y comportamiento de la animación           | `diagram/infrastructure/svg/svg-scene-player.ts`                                          |
+| Componentes y atajos de teclado                    | `src/ui/components/`                                                                      |
 
 ## Convenciones
 
@@ -85,8 +94,11 @@ Reglas, comprobadas por Biome (`biome.jsonc`):
 - Un `biome-ignore` necesita siempre su motivo en la misma línea.
 - Comentarios, nombres de lecciones y textos visibles en español; identificadores
   de código en inglés.
-- El contenido de las lecciones es original. No copies textos ni diagramas de
-  otros cursos.
+- Las clases siguen `docs/CONTEXTO-CURSO.md`. El material extra es original:
+  no copies textos ni diagramas de otros cursos.
+- Una lección declara su recorrido: `track: "principal"` (clases del curso),
+  `track: "catalogo"` (estilos y patrones) o `track: "extra"`.
+- La paleta es la de las láminas del curso; no añadas colores fuera de ella.
 
 ## Verificación
 

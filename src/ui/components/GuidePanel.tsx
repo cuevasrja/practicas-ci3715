@@ -45,16 +45,16 @@ export function GuidePanel({
             Paso {index + 1} de {total}
           </span>
         </div>
-        <h2 className="mt-3 text-xl font-semibold leading-tight tracking-tight text-ink">
+        <h2 className="mt-3 font-display text-2xl font-bold leading-tight text-ink">
           {step.title}
         </h2>
-        <div className="mt-3 flex flex-col gap-3 text-[15px] leading-relaxed text-ink-2">
+        <div className="mt-3 flex flex-col gap-3 text-[16.5px] leading-relaxed text-ink-2">
           {step.body.map((p) => (
             <p key={p}>{p}</p>
           ))}
         </div>
         {step.note ? (
-          <p className="mt-4 rounded-lg border-l-2 border-accent bg-accent-soft px-3 py-2.5 text-sm leading-relaxed text-ink">
+          <p className="mt-4 rounded-lg border-l-2 border-accent bg-accent-soft px-3 py-2.5 text-[15px] leading-relaxed text-ink">
             {step.note}
           </p>
         ) : null}
@@ -86,7 +86,7 @@ export function GuidePanel({
         {last && nextLesson ? (
           <Link
             href={nextLesson.href}
-            className="ml-auto truncate rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-surface hover:opacity-90"
+            className="ml-auto truncate rounded-lg bg-accent-fill px-3.5 py-2 text-sm font-semibold text-on-accent hover:opacity-90"
           >
             Siguiente lección: {nextLesson.title} →
           </Link>
@@ -95,7 +95,7 @@ export function GuidePanel({
             type="button"
             onClick={onNext}
             disabled={last}
-            className="ml-auto rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-surface hover:opacity-90 disabled:opacity-40"
+            className="ml-auto rounded-lg bg-accent-fill px-3.5 py-2 text-sm font-semibold text-on-accent hover:opacity-90 disabled:opacity-40"
           >
             Siguiente →
           </button>

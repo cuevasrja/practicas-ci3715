@@ -6,6 +6,8 @@ const MIN_SCALE = 0.3;
 const MAX_SCALE = 3;
 const FIT_MAX = 1.35;
 const PAD = 36;
+const PAD_TOP = 72;
+const PAD_BOTTOM = 52;
 
 export class Camera {
   view: View = { cx: 0, cy: 0, scale: 1 };
@@ -29,13 +31,17 @@ export class Camera {
     this.svg.setAttribute("viewBox", `${cx - vw / 2} ${cy - vh / 2} ${vw} ${vh}`);
   }
 
-  /** Vista que encuadra `b` en el tamaño actual. */
+  /**
+   * Vista que encuadra `b` en el tamaño actual. Arriba y abajo se reserva
+   * sitio para los controles superpuestos (contadores, herramientas, leyenda).
+   */
   fit(b: Bounds): View {
     if (!Number.isFinite(b.minX)) return { cx: 0, cy: 0, scale: 1 };
     const bw = b.maxX - b.minX + PAD * 2;
-    const bh = b.maxY - b.minY + PAD * 2;
+    const bh = b.maxY - b.minY + PAD_TOP + PAD_BOTTOM;
     const scale = Math.max(MIN_SCALE, Math.min(FIT_MAX, this.w / bw, this.h / bh));
-    return { cx: (b.minX + b.maxX) / 2, cy: (b.minY + b.maxY) / 2, scale };
+    const shift = (PAD_TOP - PAD_BOTTOM) / 2 / scale;
+    return { cx: (b.minX + b.maxX) / 2, cy: (b.minY + b.maxY) / 2 - shift, scale };
   }
 
   /** Zoom manteniendo fijo el punto de pantalla (px, py). */
